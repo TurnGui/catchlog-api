@@ -1,0 +1,16 @@
+services:
+  postgres:
+    image: postgres:16
+    container_name: catchlog-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: catchlog
+      POSTGRES_USER: catchlog_user
+      POSTGRES_PASSWORD: catchlog_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - catchlog-postgres-data:/var/lib/postgresql/data
+
+volumes:
+  catchlog-postgres-data:
