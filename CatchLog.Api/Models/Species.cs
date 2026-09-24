@@ -5,6 +5,6 @@ public class Species{
     public string CommonName { get; set; } = string.Empty;
     public string ScientificName { get; set; } = string.Empty;
     public bool IsProtected { get; set; }
-    
-    public ICollection<Catch> { get; set; } new List<Catch>();
+
+    public ICollection<Catch> Catches { get; set; } = new List<Catch>();
 }
