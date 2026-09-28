@@ -1,4 +1,5 @@
 using CatchLog.Api.Data;
+using CatchLog.Api.Services;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -9,6 +10,8 @@ builder.Services.AddOpenApi();
 
 builder.Services.AddDbContext<CatchLogDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+builder.Services.AddScoped<AnglerService>();
 
 var app = builder.Build();
 
