@@ -33,7 +33,7 @@ public class AnglerService
         {
             Name = dto.Name,
             Email = dto.Email,
-            PasswordHash = dto.Password, // TODO: hash this in the Auth phase
+            PasswordHash = BCrypt.Net.BCrypt.HashPassword(dto.Password),
             CreatedAt = DateTime.UtcNow
         };
 
