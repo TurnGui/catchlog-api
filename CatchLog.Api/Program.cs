@@ -17,6 +17,7 @@ builder.Services.AddDbContext<CatchLogDbContext>(options =>
 builder.Services.AddScoped<AnglerService>();
 builder.Services.AddScoped<SpeciesService>();
 builder.Services.AddScoped<CatchService>();
+builder.Services.AddScoped<StatisticsService>();
 builder.Services.AddScoped<TokenService>();
 builder.Services.AddScoped<AuthService>();
 
