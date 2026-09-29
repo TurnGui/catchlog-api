@@ -43,6 +43,12 @@ public class CatchService
         var species = await _context.Species.FindAsync(dto.SpeciesId)
             ?? throw new NotFoundException("Species", dto.SpeciesId);
 
+        if (species.IsProtected && !dto.IsCatchAndRelease)
+        {
+            throw new BusinessRuleException(
+                $"{species.CommonName} is a protected species and can only be registered as catch and release.");
+        }
+
         var fishCatch = new Catch
         {
             Angler = angler,
