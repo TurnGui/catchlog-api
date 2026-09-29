@@ -1,11 +1,13 @@
 using CatchLog.Api.DTOs;
 using CatchLog.Api.Exceptions;
 using CatchLog.Api.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CatchLog.Api.Controllers;
 
 [ApiController]
+[Authorize]
 [Route("api/[controller]")]
 public class SpeciesController : ControllerBase
 {

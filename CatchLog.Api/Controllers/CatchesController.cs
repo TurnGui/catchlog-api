@@ -1,11 +1,14 @@
 using CatchLog.Api.DTOs;
 using CatchLog.Api.Exceptions;
+using CatchLog.Api.Extensions;
 using CatchLog.Api.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CatchLog.Api.Controllers;
 
 [ApiController]
+[Authorize]
 [Route("api/[controller]")]
 public class CatchesController : ControllerBase
 {
@@ -40,7 +43,7 @@ public class CatchesController : ControllerBase
     {
         try
         {
-            var created = await _catchService.CreateAsync(dto);
+            var created = await _catchService.CreateAsync(User.GetAnglerId(), dto);
             return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
         }
         catch (NotFoundException ex)
@@ -52,12 +55,19 @@ public class CatchesController : ControllerBase
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(int id)
     {
-        var deleted = await _catchService.DeleteAsync(id);
-        if (!deleted)
+        try
         {
-            return NotFound();
-        }
+            var deleted = await _catchService.DeleteAsync(id, User.GetAnglerId());
+            if (!deleted)
+            {
+                return NotFound();
+            }
 
-        return NoContent();
+            return NoContent();
+        }
+        catch (ForbiddenException ex)
+        {
+            return StatusCode(StatusCodes.Status403Forbidden, new { error = ex.Message });
+        }
     }
 }
