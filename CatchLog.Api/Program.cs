@@ -13,6 +13,7 @@ builder.Services.AddDbContext<CatchLogDbContext>(options =>
 
 builder.Services.AddScoped<AnglerService>();
 builder.Services.AddScoped<SpeciesService>();
+builder.Services.AddScoped<CatchService>();
 
 var app = builder.Build();
 
