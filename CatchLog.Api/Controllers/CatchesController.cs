@@ -50,6 +50,10 @@ public class CatchesController : ControllerBase
         {
             return BadRequest(new { error = ex.Message });
         }
+        catch (BusinessRuleException ex)
+        {
+            return UnprocessableEntity(new { error = ex.Message });
+        }
     }
 
     [HttpDelete("{id}")]
