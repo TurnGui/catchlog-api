@@ -1,5 +1,6 @@
 using CatchLog.Api.Data;
 using CatchLog.Api.DTOs;
+using CatchLog.Api.Exceptions;
 using CatchLog.Api.Models;
 using Microsoft.EntityFrameworkCore;
 
@@ -21,12 +22,13 @@ public class SpeciesService
             .ToListAsync();
     }
 
-     public async Task<SpeciesResponseDto?> GetByIdAsync(int id)
+    public async Task<SpeciesResponseDto?> GetByIdAsync(int id)
     {
         var species = await _context.Species.FindAsync(id);
         return species is null ? null : ToResponseDto(species);
     }
-       public async Task<SpeciesResponseDto> CreateAsync(CreateSpeciesDto dto)
+
+    public async Task<SpeciesResponseDto> CreateAsync(CreateSpeciesDto dto)
     {
         var species = new Species
         {
@@ -47,6 +49,13 @@ public class SpeciesService
         if (species is null)
         {
             return false;
+        }
+
+        var hasCatches = await _context.Catches.AnyAsync(c => c.SpeciesId == id);
+        if (hasCatches)
+        {
+            throw new ConflictException(
+                $"Species with id {id} has associated catches and cannot be deleted.");
         }
 
         _context.Species.Remove(species);
