@@ -12,6 +12,8 @@ builder.Services.AddDbContext<CatchLogDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 builder.Services.AddScoped<AnglerService>();
+builder.Services.AddScoped<SpeciesService>();
+builder.Services.AddScoped<CatchService>();
 
 var app = builder.Build();
 

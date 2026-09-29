@@ -1,5 +1,6 @@
 using CatchLog.Api.Data;
 using CatchLog.Api.DTOs;
+using CatchLog.Api.Exceptions;
 using CatchLog.Api.Models;
 using Microsoft.EntityFrameworkCore;
 
@@ -38,6 +39,28 @@ public class AnglerService
         };
 
         _context.Anglers.Add(angler);
+        await _context.SaveChangesAsync();
+
+        return ToResponseDto(angler);
+    }
+
+    public async Task<AnglerResponseDto?> UpdateAsync(int id, UpdateAnglerDto dto)
+    {
+        var angler = await _context.Anglers.FindAsync(id);
+        if (angler is null)
+        {
+            return null;
+        }
+
+        var emailTaken = await _context.Anglers
+            .AnyAsync(a => a.Email == dto.Email && a.Id != id);
+        if (emailTaken)
+        {
+            throw new ConflictException($"Email {dto.Email} is already in use.");
+        }
+
+        angler.Name = dto.Name;
+        angler.Email = dto.Email;
         await _context.SaveChangesAsync();
 
         return ToResponseDto(angler);

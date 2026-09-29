@@ -1,4 +1,5 @@
 using CatchLog.Api.DTOs;
+using CatchLog.Api.Exceptions;
 using CatchLog.Api.Services;
 using Microsoft.AspNetCore.Mvc;
 
@@ -39,6 +40,25 @@ public class AnglersController : ControllerBase
     {
         var created = await _anglerService.CreateAsync(dto);
         return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
+    }
+
+    [HttpPut("{id}")]
+    public async Task<ActionResult<AnglerResponseDto>> Update(int id, UpdateAnglerDto dto)
+    {
+        try
+        {
+            var updated = await _anglerService.UpdateAsync(id, dto);
+            if (updated is null)
+            {
+                return NotFound();
+            }
+
+            return Ok(updated);
+        }
+        catch (ConflictException ex)
+        {
+            return Conflict(new { error = ex.Message });
+        }
     }
 
     [HttpDelete("{id}")]
