@@ -2,7 +2,6 @@ namespace CatchLog.Api.DTOs;
 
 public class CreateCatchDto
 {
-    public int AnglerId { get; set; }
     public int SpeciesId { get; set; }
     public decimal WeightKg { get; set; }
     public decimal LengthCm { get; set; }

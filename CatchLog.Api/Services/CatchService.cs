@@ -35,13 +35,19 @@ public class CatchService
         return fishCatch is null ? null : ToResponseDto(fishCatch);
     }
 
-    public async Task<CatchResponseDto> CreateAsync(CreateCatchDto dto)
+    public async Task<CatchResponseDto> CreateAsync(int anglerId, CreateCatchDto dto)
     {
-        var angler = await _context.Anglers.FindAsync(dto.AnglerId)
-            ?? throw new NotFoundException("Angler", dto.AnglerId);
+        var angler = await _context.Anglers.FindAsync(anglerId)
+            ?? throw new NotFoundException("Angler", anglerId);
 
         var species = await _context.Species.FindAsync(dto.SpeciesId)
             ?? throw new NotFoundException("Species", dto.SpeciesId);
+
+        if (species.IsProtected && !dto.IsCatchAndRelease)
+        {
+            throw new BusinessRuleException(
+                $"{species.CommonName} is a protected species and can only be registered as catch and release.");
+        }
 
         var fishCatch = new Catch
         {
@@ -64,12 +70,17 @@ public class CatchService
         return ToResponseDto(fishCatch);
     }
 
-    public async Task<bool> DeleteAsync(int id)
+    public async Task<bool> DeleteAsync(int id, int anglerId)
     {
         var fishCatch = await _context.Catches.FindAsync(id);
         if (fishCatch is null)
         {
             return false;
+        }
+
+        if (fishCatch.AnglerId != anglerId)
+        {
+            throw new ForbiddenException("You can only delete your own catches.");
         }
 
         _context.Catches.Remove(fishCatch);
