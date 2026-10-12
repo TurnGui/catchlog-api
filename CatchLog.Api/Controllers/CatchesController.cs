@@ -1,5 +1,4 @@
 using CatchLog.Api.DTOs;
-using CatchLog.Api.Exceptions;
 using CatchLog.Api.Extensions;
 using CatchLog.Api.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -41,37 +40,19 @@ public class CatchesController : ControllerBase
     [HttpPost]
     public async Task<ActionResult<CatchResponseDto>> Create(CreateCatchDto dto)
     {
-        try
-        {
-            var created = await _catchService.CreateAsync(User.GetAnglerId(), dto);
-            return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
-        }
-        catch (NotFoundException ex)
-        {
-            return BadRequest(new { error = ex.Message });
-        }
-        catch (BusinessRuleException ex)
-        {
-            return UnprocessableEntity(new { error = ex.Message });
-        }
+        var created = await _catchService.CreateAsync(User.GetAnglerId(), dto);
+        return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
     }
 
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(int id)
     {
-        try
+        var deleted = await _catchService.DeleteAsync(id, User.GetAnglerId());
+        if (!deleted)
         {
-            var deleted = await _catchService.DeleteAsync(id, User.GetAnglerId());
-            if (!deleted)
-            {
-                return NotFound();
-            }
+            return NotFound();
+        }
 
-            return NoContent();
-        }
-        catch (ForbiddenException ex)
-        {
-            return StatusCode(StatusCodes.Status403Forbidden, new { error = ex.Message });
-        }
+        return NoContent();
     }
 }

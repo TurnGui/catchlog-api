@@ -51,24 +51,16 @@ public class AnglersController : ControllerBase
     {
         if (id != User.GetAnglerId())
         {
-            return StatusCode(StatusCodes.Status403Forbidden,
-                new { error = "You can only update your own account." });
+            throw new ForbiddenException("You can only update your own account.");
         }
 
-        try
+        var updated = await _anglerService.UpdateAsync(id, dto);
+        if (updated is null)
         {
-            var updated = await _anglerService.UpdateAsync(id, dto);
-            if (updated is null)
-            {
-                return NotFound();
-            }
+            return NotFound();
+        }
 
-            return Ok(updated);
-        }
-        catch (ConflictException ex)
-        {
-            return Conflict(new { error = ex.Message });
-        }
+        return Ok(updated);
     }
 
     [HttpDelete("{id}")]
@@ -76,8 +68,7 @@ public class AnglersController : ControllerBase
     {
         if (id != User.GetAnglerId())
         {
-            return StatusCode(StatusCodes.Status403Forbidden,
-                new { error = "You can only delete your own account." });
+            throw new ForbiddenException("You can only delete your own account.");
         }
 
         var deleted = await _anglerService.DeleteAsync(id);

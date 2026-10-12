@@ -1,5 +1,4 @@
 using CatchLog.Api.DTOs;
-using CatchLog.Api.Exceptions;
 using CatchLog.Api.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -47,19 +46,12 @@ public class SpeciesController : ControllerBase
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(int id)
     {
-        try
+        var deleted = await _speciesService.DeleteAsync(id);
+        if (!deleted)
         {
-            var deleted = await _speciesService.DeleteAsync(id);
-            if (!deleted)
-            {
-                return NotFound();
-            }
+            return NotFound();
+        }
 
-            return NoContent();
-        }
-        catch (ConflictException ex)
-        {
-            return Conflict(new { error = ex.Message });
-        }
+        return NoContent();
     }
 }

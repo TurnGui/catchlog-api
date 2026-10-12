@@ -1,3 +1,4 @@
 <Solution>
   <Project Path="CatchLog.Api/CatchLog.Api.csproj" />
+  <Project Path="CatchLog.Tests/CatchLog.Tests.csproj" />
 </Solution>
