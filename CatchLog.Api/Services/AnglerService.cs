@@ -30,6 +30,12 @@ public class AnglerService
 
     public async Task<AnglerResponseDto> CreateAsync(CreateAnglerDto dto)
     {
+        var emailTaken = await _context.Anglers.AnyAsync(a => a.Email == dto.Email);
+        if (emailTaken)
+        {
+            throw new ConflictException($"Email {dto.Email} is already in use.");
+        }
+
         var angler = new Angler
         {
             Name = dto.Name,
