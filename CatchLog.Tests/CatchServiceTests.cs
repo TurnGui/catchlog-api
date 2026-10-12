@@ -3,6 +3,7 @@ using CatchLog.Api.Exceptions;
 using CatchLog.Api.Models;
 using CatchLog.Api.Services;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Distributed;
 
 namespace CatchLog.Tests;
 
@@ -24,7 +25,7 @@ public class CatchServiceTests
         context.Species.Add(species);
         await context.SaveChangesAsync();
 
-        var service = new CatchService(context);
+        var service = new CatchService(context, TestCacheFactory.Create());
         var dto = new CreateCatchDto
         {
             SpeciesId = species.Id,
@@ -57,7 +58,7 @@ public class CatchServiceTests
         context.Species.Add(species);
         await context.SaveChangesAsync();
 
-        var service = new CatchService(context);
+        var service = new CatchService(context, TestCacheFactory.Create());
         var dto = new CreateCatchDto
         {
             SpeciesId = species.Id,
@@ -86,7 +87,7 @@ public class CatchServiceTests
         context.Species.Add(species);
         await context.SaveChangesAsync();
 
-        var service = new CatchService(context);
+        var service = new CatchService(context, TestCacheFactory.Create());
         var dto = new CreateCatchDto
         {
             SpeciesId = species.Id,
@@ -121,11 +122,42 @@ public class CatchServiceTests
         context.Catches.Add(fishCatch);
         await context.SaveChangesAsync();
 
-        var service = new CatchService(context);
+        var service = new CatchService(context, TestCacheFactory.Create());
 
         // Act + Assert
         await Assert.ThrowsAsync<ForbiddenException>(
             () => service.DeleteAsync(fishCatch.Id, other.Id));
         Assert.Equal(1, await context.Catches.CountAsync());
+    }
+
+    [Fact]
+    public async Task CreateAsync_ValidCatch_InvalidatesStatisticsCache()
+    {
+        // Arrange
+        using var context = TestDbContextFactory.Create();
+        var angler = new Angler { Name = "Ana", Email = "ana@test.com" };
+        var species = new Species { CommonName = "Sea Bass", ScientificName = "Dicentrarchus labrax" };
+        context.Anglers.Add(angler);
+        context.Species.Add(species);
+        await context.SaveChangesAsync();
+
+        var cache = TestCacheFactory.Create();
+        await cache.SetStringAsync(StatisticsService.SpeciesStatisticsCacheKey, "[]");
+
+        var service = new CatchService(context, cache);
+        var dto = new CreateCatchDto
+        {
+            SpeciesId = species.Id,
+            WeightKg = 2,
+            LengthCm = 45,
+            Location = "Rio Cávado",
+            CaughtAt = DateTime.UtcNow
+        };
+
+        // Act
+        await service.CreateAsync(angler.Id, dto);
+
+        // Assert
+        Assert.Null(await cache.GetStringAsync(StatisticsService.SpeciesStatisticsCacheKey));
     }
 }

@@ -18,8 +18,11 @@ builder.Services.AddProblemDetails();
 builder.Services.AddDbContext<CatchLogDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
+builder.Services.AddStackExchangeRedisCache(options =>
+    options.Configuration = builder.Configuration.GetConnectionString("Redis")); // NEW
+
 builder.Services.AddHealthChecks()
-    .AddDbContextCheck<CatchLogDbContext>(); // NEW
+    .AddDbContextCheck<CatchLogDbContext>();
 
 builder.Services.AddScoped<AnglerService>();
 builder.Services.AddScoped<SpeciesService>();
@@ -65,6 +68,6 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
-app.MapHealthChecks("/health"); // NEW
+app.MapHealthChecks("/health");
 
 app.Run();
