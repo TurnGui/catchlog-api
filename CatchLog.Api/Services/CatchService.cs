@@ -3,16 +3,19 @@ using CatchLog.Api.DTOs;
 using CatchLog.Api.Exceptions;
 using CatchLog.Api.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Distributed;
 
 namespace CatchLog.Api.Services;
 
 public class CatchService
 {
     private readonly CatchLogDbContext _context;
+    private readonly IDistributedCache _cache;
 
-    public CatchService(CatchLogDbContext context)
+    public CatchService(CatchLogDbContext context, IDistributedCache cache)
     {
         _context = context;
+        _cache = cache;
     }
 
     public async Task<List<CatchResponseDto>> GetAllAsync()
@@ -66,6 +69,7 @@ public class CatchService
 
         _context.Catches.Add(fishCatch);
         await _context.SaveChangesAsync();
+        await _cache.RemoveAsync(StatisticsService.SpeciesStatisticsCacheKey); // NEW
 
         return ToResponseDto(fishCatch);
     }
@@ -85,6 +89,7 @@ public class CatchService
 
         _context.Catches.Remove(fishCatch);
         await _context.SaveChangesAsync();
+        await _cache.RemoveAsync(StatisticsService.SpeciesStatisticsCacheKey); // NEW
         return true;
     }
 
